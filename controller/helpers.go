@@ -81,6 +81,7 @@ func deleteTasks(task_coll *mongo.Collection, task_ids []string) int {
 		if err != nil {
 			log.Fatal(err)
 			return 400
+
 		}
 		fmt.Printf("The %dth deleted task with task ID %s was deleted!\n", ind, task_id)
 	}
