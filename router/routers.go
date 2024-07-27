@@ -7,7 +7,7 @@ import (
 
 func Router() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc("/", controller.GetAllTasks).Methods("GET")
+	router.HandleFunc("/", controller.Index).Methods("GET")
 	router.HandleFunc("/tasks", controller.GetAllTasks).Methods("GET")
 	router.HandleFunc("/task/{id}", controller.GetTask).Methods("GET")
 	router.HandleFunc("/delete_tasks", controller.DeleteTasks).Methods("DELETE")
