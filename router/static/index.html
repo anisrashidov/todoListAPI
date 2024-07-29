@@ -1,0 +1,19 @@
+<html>
+    <header>
+        <title>Your tasks for today - {{.Date}}</title>
+    </header>
+    <body>
+        <h1>Your tasks for today are:</h1>
+        <dl>
+            {{range $task := .Tasks}}
+            {{if not $task.task_mark}}
+            <dt>{{$task.task_name}}</dt>
+            <dd>Task Description <p>{{$task.task_desc}}</p></dd>
+            <dd>Task due: {{$task.task_due}}</dd>
+            {{end}}
+            {{else}}
+            <p>You have no tasks for today :)</p>
+            {{end}}
+        </dl>
+    </body>
+</html>

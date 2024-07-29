@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"text/template"
 
 	"github.com/anisrashidov/todoAPP/model"
 	"github.com/gorilla/mux"
 	"github.com/lpernett/godotenv"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -39,13 +41,7 @@ func init() {
 }
 
 func Index(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("<h1>Welcome to our TODO List API</h1>"))
-	// fmt.Println("This function is entered as soon as the server starts")
 	defer GetAllTasks(w, r)
-	// err := json.NewEncoder(w).Encode([]byte("<h1>Welcome to our TODO List API</h1>"))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 }
 
 func GetTask(w http.ResponseWriter, r *http.Request) {
@@ -59,10 +55,14 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "GET")
 	tasks := getAllTasks(task_coll)
-	json.NewEncoder(w).Encode(tasks)
+	tmpl, err := template.ParseFiles("../todoListAPI/router/static/index.html")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// json.NewEncoder(w).Encode(tasks)
+	tmpl.Execute(w, map[string]([]primitive.M){"Tasks": tasks})
 	fmt.Println(tasks)
 	fmt.Println("_______________________________________________________")
 }
@@ -71,13 +71,12 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "PUT")
 	var task model.Task
-	fmt.Println(r.Body)
 	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println("The following task will be addded: ", task.DueDate)
+	fmt.Println("The following task will be addded: ", task)
 	status_code := createTask(task_coll, task)
 	w.WriteHeader(status_code)
 	fmt.Println("_______________________________________________________")

@@ -17,8 +17,8 @@ import (
 
 type Task struct {
 	Id          primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name        string             `json:"task_name,omitempty"`
-	Description string             `json:"task_desc,omitempty"`
-	DueDate     string             `json:"task_due,omitempty"`
-	MarkedDone  bool               `json:"task_mark,omitempty"`
+	Name        string             `json:"task_name,omitempty" bson:"task_name,omitempty"`
+	Description string             `json:"task_desc,omitempty" bson:"task_desc,omitempty"`
+	DueDate     string             `json:"task_due,omitempty" bson:"task_due,omitempty"`
+	MarkedDone  bool               `json:"task_mark" bson:"task_mark"`
 }

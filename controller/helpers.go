@@ -58,7 +58,7 @@ func updateTask(task_coll *mongo.Collection, task_id string) (status_code int) {
 		return 400
 	}
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"task_mark": "true"}}
+	update := bson.M{"$set": bson.M{"task_mark": true}}
 	res, err := task_coll.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		log.Fatal(err)
