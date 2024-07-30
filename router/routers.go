@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/anisrashidov/todoAPP/controller"
 	"github.com/gorilla/mux"
 )
@@ -13,5 +15,6 @@ func Router() *mux.Router {
 	router.HandleFunc("/delete_tasks", controller.DeleteTasks).Methods("DELETE")
 	router.HandleFunc("/create", controller.CreateTask).Methods("PUT")
 	router.HandleFunc("/edit", controller.UpdateTask).Methods("POST")
+	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./router/static/"))))
 	return router
 }
