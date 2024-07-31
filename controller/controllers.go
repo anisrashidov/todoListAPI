@@ -107,7 +107,7 @@ func DeleteTasks(w http.ResponseWriter, r *http.Request) {
 	}
 	ids_p := params["ids"].(string)
 	fmt.Println(ids_p)
-	var ids = strings.SplitAfter(ids_p, ",")
+	var ids = strings.Split(ids_p, ",")
 	fmt.Println(ids)
 	status_code := deleteTasks(task_coll, ids)
 	w.WriteHeader(status_code)

@@ -1,23 +1,209 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Your tasks for today - {{.Date}}</title>
-    <link rel="stylesheet" type="text/css" href="/static/style.css">
-  </head>
-  <body>
+<head>
+  <title>Your tasks for today - {{.Date}}</title>
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
     <div class="container">
-      <h1>Your tasks for today are:</h1>
-      <dl>
-        {{range $task := .Tasks}} {{if not $task.task_mark}}
-        <dt>{{$task.task_name}}</dt>
-        <dd>
-          Task Description
-          <p>{{$task.task_desc}}</p>
-        </dd>
-        <dd>Task due: {{$task.task_due}}</dd>
-        {{end}} {{else}}
+        <h1>Your tasks for today are:
+            <div class="header-methods">
+                <button type="button" id="create-btn">+create</button>
+                <button type="button" class="delete-mult-btn" id="delete-mult-btn" style="display:none;">Delete</button>
+            </div>
+        </h1>
+        <div class="content-form" id="create-form">
+            <form id="new-task-form">
+                <ul>
+                    <li>
+                        <label for="task-name">Name:</label>
+                        <input type="text" id="task-name" name="task_name">
+                    </li>
+                    <li>
+                        <label for="task-desc">Description:</label>
+                        <textarea id="task-desc" name="task_desc"></textarea>
+                    </li>
+                    <li>
+                        <label for="task-due">Due date:</label>
+                        <input type="datetime-local" id="task-due" name="task_due">
+                    </li>
+                    <li>
+                        <button type="submit" class="submit-btn">Submit</button>
+                    </li>
+                </ul>
+            </form>
+        </div>
+        {{range $task := .Tasks}}
+        {{if not $task.task_mark}}
+        <button type="button" class="collapsible" name="{{$task._id}}">
+          <span class="pressable">{{$task.task_name}}</span>
+          <div class="checkbox-cont">
+            <input type="button" class="delete-btn" value="Delete" id="{{$task._id}}">
+            <input type="checkbox" class="checkbox">
+          </div>
+        </button>
+        <div class="content">
+          <ul>
+              <li> <b>Task description:</b> {{$task.task_desc}}</li>
+              <li> <b>Task due:</b> {{$task.task_due}}</li>
+          </ul>
+        </div>
+        {{else}}
         <p>You have no tasks for today :)</p>
         {{end}}
-      </dl>
+        {{end}}
     </div>
-  </body>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var coll = document.getElementsByClassName("collapsible");
+            var i;
+
+            for (i = 0; i < coll.length; i++) {
+                coll[i].addEventListener("click", function(event) {
+                    if (event.target.tagName.toLowerCase() === 'input') {
+                        // Do nothing if the checkbox is clicked
+                        return;
+                    }
+                    var content = this.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            }
+
+            var delBtn = document.getElementsByClassName("delete-btn");
+            for (i = 0; i < delBtn.length; i++) {
+                delBtn[i].addEventListener("click", function(event) {
+                    var id = this.id;
+                    deleteTasks([id]);
+                    var content = document.getElementsByName(id)[0];
+                    var sib = content.nextElementSibling;
+                    content.style.display = "none";
+                    sib.style.display = "none";
+                });
+            }
+
+            document.getElementById("create-btn").addEventListener("click", function() {
+                var formContent = document.getElementById("create-form");
+                if (formContent.style.maxHeight) {
+                    this.innerHTML = "+create";
+                    formContent.style.maxHeight = null;
+                } else {
+                    this.innerHTML = "cancel";
+                    formContent.style.maxHeight = formContent.scrollHeight + "px";
+                }
+            });
+
+            document.getElementById("new-task-form").addEventListener("submit", function(event) {
+                event.preventDefault();
+                // Add logic to submit the new task
+                var name = document.getElementById("task-name").value;
+                var desc = document.getElementById("task-desc").value;
+                var due = getUnixTimestamp();
+                console.log(name + " " + desc + " " + due);
+                addTask(name, desc, due);
+            });
+
+            var checkboxes = document.getElementsByClassName("checkbox");
+            for (i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].addEventListener("change", function() {
+                    toggleDeleteButton();
+                });
+            }
+
+            document.getElementById("delete-mult-btn").addEventListener("click", function(event){
+                var checkboxes = document.getElementsByClassName("checkbox");
+                var at_least_one_checked = false;
+                var checked_ids = []
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].checked) {
+                        var id = checkboxes[i].previousElementSibling.id
+                        checked_ids.push(id)
+                    }
+                }
+                console.log(checked_ids)
+                deleteTasks(checked_ids)
+                for(var i=0; i<checked_ids.length; i++){
+                    var id = checked_ids[i]
+                    var content = document.getElementsByName(id)[0];
+                    var sib = content.nextElementSibling;
+                    content.style.display = "none";
+                    sib.style.display = "none";
+                }
+            })
+        });
+
+        function toggleDeleteButton() {
+            var checkboxes = document.getElementsByClassName("checkbox");
+            var deleteBtn = document.getElementById("delete-mult-btn");
+            var at_least_one_checked = false;
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    at_least_one_checked = true;
+                    break;
+                }
+            }
+            deleteBtn.style.display = at_least_one_checked ? "inline-block" : "none";
+        }
+
+        function deleteTasks(ids_p) {
+            const ids = ids_p.join(",");
+            console.log(ids);
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status === 200) {
+                        console.log("Deleted");
+                    } else {
+                        console.log("Error: " + this.status);
+                    }
+                }
+            };
+            xhttp.open("DELETE", "http://127.0.0.1:8000/delete_tasks", true);
+            xhttp.setRequestHeader("Content-Type", "application/json");
+            xhttp.send(JSON.stringify({ "ids": ids }));
+        }
+
+        function getUnixTimestamp() {
+            var input = document.getElementById('task-due').value;
+            var date = new Date(input);
+
+            if (isNaN(date.getTime())) {
+                document.getElementById('unix-timestamp').innerText = "Invalid date/time";
+                return;
+            }
+
+            var formattedDate = ("0" + date.getDate()).slice(-2) + "/" +
+                                ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
+                                date.getFullYear().toString().slice(-2) + " " +
+                                ("0" + date.getHours()).slice(-2) + ":" +
+                                ("0" + date.getMinutes()).slice(-2);
+            var unixTimestamp = date.getTime() / 1000;
+
+            var timestampString = unixTimestamp.toString();
+            return timestampString;
+        }
+
+        function addTask(name, desc, due) {
+            console.log(name + ", " + desc + ", " + due);
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status === 200) {
+                        console.log("Task added");
+                    } else {
+                        console.log("Error: " + this.status);
+                    }
+                    window.location.reload();
+                }
+            };
+            xhttp.open("PUT", "http://127.0.0.1:8000/create", true);
+            xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhttp.send(JSON.stringify({ "task_name": name, "task_desc": desc, "task_due": due, "task_mark": false }));
+        }
+    </script>
+</body>
 </html>

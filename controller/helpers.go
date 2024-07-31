@@ -24,6 +24,7 @@ func getAllTasks(task_coll *mongo.Collection) []primitive.M {
 		if err != nil {
 			log.Fatal(err)
 		}
+		task_inq["_id"] = task_inq["_id"].(primitive.ObjectID).Hex()
 		tasks_inq = append(tasks_inq, task_inq)
 	}
 	return tasks_inq

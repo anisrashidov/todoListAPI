@@ -11,3 +11,105 @@ body {
   width: 1050px;
   border-radius: 5px;
 }
+
+.collapsible {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 10px;
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 15px;
+}
+
+.content {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.2s ease-out;
+  padding: 0 10px;
+  border-top: 1px solid #ccc;
+  font-size: large;
+  font-family:Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+
+.content > ul {
+  list-style-type: none;
+}
+
+.collapsible:hover {
+  background-color: #555;
+}
+
+.delete-btn{
+  padding: 8px;
+  box-sizing: content-box;
+  color: #ffffff;
+  background: hsl(0, 54%, 54%);
+  border:none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-mult-btn{
+  padding: 8px;
+  box-sizing: content-box;
+  color: #ffffff;
+  background: hsl(0, 54%, 54%);
+  border:none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.content-form {
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  max-height: 0;
+}
+
+#new-task-form > ul {
+  list-style-type: none;
+}
+
+#task-name, #task-desc, #task-due{
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+#task-name:focus, #task-desc:focus, #task-due:focus{
+  border: 3px solid #555;
+}
+
+.submit-btn{
+  background-color: #e7e7e7;
+  color: black;
+  padding: 10px;
+  font-size: 15px;
+  border-style: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+#create-btn{
+  background-color: #e7e7e7;
+  color: black;
+  padding: 10px;
+  font-size: 15px;
+  border-style: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+h1{
+  display: flex;
+  justify-content: space-between;
+}

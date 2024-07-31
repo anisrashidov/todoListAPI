@@ -29,7 +29,7 @@ def delete():
 def getAll():
     response = r.get(url + "/tasks", headers={"Content-Type": "application/json"})
     print(response.status_code)
-    print(json.dumps(json.loads(response.text), indent=2))
+    # print(json.dumps(json.loads(response.text), indent=2))
 
 def update():
     id = input("Input the ID of the record pending updater... ")
