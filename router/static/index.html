@@ -83,6 +83,8 @@
     </div>
 
     <script>
+        var currentHost = window.location.protocol + '//' + window.location.host
+        console.log(currentHost)
         document.addEventListener("DOMContentLoaded", function() {
             var coll = document.getElementsByClassName("collapsible");
             var i;
@@ -261,7 +263,7 @@
                     }
                 }
             };
-            xhttp.open("DELETE", "http://127.0.0.1:8000/delete_tasks", true);
+            xhttp.open("DELETE", currentHost + "/delete_tasks", true);
             xhttp.setRequestHeader("Content-Type", "application/json");
             xhttp.send(JSON.stringify({ "ids": ids }));
         }
@@ -291,7 +293,7 @@
                     window.location.reload();
                 }
             };
-            xhttp.open("PUT", "http://127.0.0.1:8000/create", true);
+            xhttp.open("PUT", currentHost + "/create", true);
             xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhttp.send(JSON.stringify({ "task_name": name, "task_desc": desc, "task_due": due, "task_mark": false }));
         }
@@ -309,7 +311,7 @@
                     window.location.reload();
                 }
             };
-            xhttp.open("POST", "http://127.0.0.1:8000/edit", true);
+            xhttp.open("POST", currentHost + "/edit", true);
             xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhttp.send(JSON.stringify({ "_id": id, "task_name": name, "task_desc": desc, "task_due": due, "task_mark": mark }));
         }
