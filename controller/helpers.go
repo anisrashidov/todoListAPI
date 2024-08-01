@@ -51,15 +51,15 @@ func createTask(task_coll *mongo.Collection, task model.Task) int {
 	return 200
 }
 
-func updateTask(task_coll *mongo.Collection, task_id string) (status_code int) {
+func updateTask(task_coll *mongo.Collection, task model.Task) (status_code int) {
 	status_code = 200
-	id, err := primitive.ObjectIDFromHex(task_id)
-	if err != nil {
-		log.Fatal(err)
-		return 400
-	}
-	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"task_mark": true}}
+	// id, err := primitive.ObjectIDFromHex(task.Id)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return 400
+	// }
+	filter := bson.M{"_id": task.Id}
+	update := bson.M{"$set": bson.M{"task_mark": task.MarkedDone, "task_desc": task.Description, "task_due": task.DueDate}}
 	res, err := task_coll.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		log.Fatal(err)

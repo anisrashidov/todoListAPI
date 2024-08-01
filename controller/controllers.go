@@ -9,11 +9,12 @@ import (
 	"os"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/anisrashidov/todoAPP/model"
+	"github.com/anisrashidov/todoAPP/schema"
 	"github.com/gorilla/mux"
 	"github.com/lpernett/godotenv"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -62,7 +63,7 @@ func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 		log.Fatal(err)
 	}
 	// json.NewEncoder(w).Encode(tasks)
-	tmpl.Execute(w, map[string]([]primitive.M){"Tasks": tasks})
+	tmpl.Execute(w, schema.HomeSchema{Tasks: tasks, Date: time.Now().Format("Wed 2017-09-2")})
 	fmt.Println(tasks)
 	fmt.Println("_______________________________________________________")
 }
@@ -85,14 +86,14 @@ func CreateTask(w http.ResponseWriter, r *http.Request) {
 func UpdateTask(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-type", "application/x-www-form-urlencode")
 	w.Header().Set("Allow-Control-Allow-Methods", "POST")
-	var params map[string]interface{}
-	err := json.NewDecoder(r.Body).Decode(&params)
+	var task model.Task
+	err := json.NewDecoder(r.Body).Decode(&task)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println(params["task_id"].(string))
-	w.WriteHeader(updateTask(task_coll, params["task_id"].(string)))
+	fmt.Println(task.Id)
+	w.WriteHeader(updateTask(task_coll, task))
 	fmt.Println("_______________________________________________________")
 }
 

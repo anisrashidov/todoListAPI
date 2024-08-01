@@ -6,7 +6,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>Your tasks for today are:
+        <h1>
+            {{if .Tasks}}
+            Your tasks for today are:    
+            {{else}}
+            You have no tasks for today :)
+            {{end}}
             <div class="header-methods">
                 <button type="button" id="create-btn">+create</button>
                 <button type="button" class="delete-mult-btn" id="delete-mult-btn" style="display:none;">Delete</button>
@@ -43,13 +48,36 @@
           </div>
         </button>
         <div class="content">
-          <ul>
-              <li> <b>Task description:</b> {{$task.task_desc}}</li>
-              <li> <b>Task due:</b> {{$task.task_due}}</li>
+          <ul class="task-view">
+            <li> <b>Task description:</b> {{$task.task_desc}}</li>
+            <li style="display: flex; justify-content: space-between;"> 
+                <span><b>Task due:</b> {{$task.task_due}}</span>
+                <button type="button" class="edit-task-btn">Modify</button>
+            </li>
+            <li id="task{{$task._id}}_mark" style="display: none;">{{$task.task_mark}}</li>
           </ul>
+          <form class="task-edit" style="display: none;">
+            <ul>
+                <li>
+                    <label for="edit-task-name">Name:</label>
+                    <input type="text" class="edit-task-name" value="{{$task.task_name}}">
+                </li>
+                <li>
+                    <label for="edit-task-desc">Description:</label>
+                    <textarea class="edit-task-desc">{{$task.task_desc}}</textarea>
+                </li>
+                <li>
+                    <label for="edit-task-due">Due date:</label>
+                    <input type="datetime-local" class="edit-task-due" value="convertUnixTimestamp({{$task.task_due}})">
+                </li>
+                <li style="display: flex; justify-content: space-between;">
+                    <button type="submit" class="submit-edit-btn">Save</button>
+                    <button type="submit" class="complete-edit-btn">Completed</button>
+                    <button type="button" class="cancel-edit-btn">Cancel</button>
+                </li>
+            </ul>
+          </form>
         </div>
-        {{else}}
-        <p>You have no tasks for today :)</p>
         {{end}}
         {{end}}
     </div>
@@ -133,8 +161,79 @@
                     content.style.display = "none";
                     sib.style.display = "none";
                 }
-            })
+            });
+
+            var editBtns = document.getElementsByClassName("edit-task-btn");
+            for (i = 0; i < editBtns.length; i++) {
+                editBtns[i].addEventListener("click", function() {
+                    var taskView = this.closest('.task-view');
+                    var taskEdit = taskView.nextElementSibling;
+                    taskView.style.display = 'none';
+                    taskEdit.style.display = 'block';
+
+                    // Adjust the height of the collapsible content
+                    var content = taskEdit.closest('.content');
+                    content.style.maxHeight = content.scrollHeight + "px";
+                });
+            }
+
+            var cancelEditBtns = document.getElementsByClassName("cancel-edit-btn");
+            for (i = 0; i < cancelEditBtns.length; i++) {
+                cancelEditBtns[i].addEventListener("click", function() {
+                    var taskEdit = this.closest('.task-edit');
+                    var taskView = taskEdit.previousElementSibling;
+                    taskEdit.style.display = 'none';
+                    taskView.style.display = 'block';
+
+                    // Adjust the height of the collapsible content
+                    var content = taskEdit.closest('.content');
+                    content.style.maxHeight = content.scrollHeight + "px";
+                });
+            }
+
+            var editForms = document.getElementsByClassName("submit-edit-btn");
+            for (i = 0; i < editForms.length; i++) {
+                editForms[i].addEventListener("click", function(event) {
+                    event.preventDefault();
+                    var form = document.getElementsByClassName("task-edit")[0];
+                    var id = document.getElementsByClassName("collapsible")[0].name
+                    var name = form.querySelector('.edit-task-name').value;
+                    var desc = form.querySelector('.edit-task-desc').value;
+                    var due = getUnixTimestamp(form.querySelector('.edit-task-due').value);
+                    var mark = document.getElementById("task" + id + "_mark").value === 1
+                    updateTask(id, name, desc, due, mark);
+                });
+            }
+
+            var completeTasks = document.getElementsByClassName("complete-edit-btn");
+            for (i = 0; i < editForms.length; i++) {
+                completeTasks[i].addEventListener("click", function(event) {
+                    event.preventDefault();
+                    var form = document.getElementsByClassName("task-edit")[0];
+                    var id = document.getElementsByClassName("collapsible")[0].name
+                    var name = form.querySelector('.edit-task-name').value;
+                    var desc = form.querySelector('.edit-task-desc').value;
+                    var due = getUnixTimestamp(form.querySelector('.edit-task-due').value);
+                    updateTask(id, name, desc, due, true);
+                });
+            }
+
+            var dueElements = document.getElementsByClassName('task-due');
+            for (var i = 0; i < dueElements.length; i++) {
+                var element = dueElements[i];
+                var timestamp = element.textContent;
+                var date = convertUnixTimestamp(timestamp);
+                element.textContent = formatDate(date);
+            }
+
         });
+
+        function convertUnixTimestamp(unixTimestampString) {
+            var unixTimestamp = parseInt(unixTimestampString);
+            var date = new Date(unixTimestamp * 1000);
+            return date;
+        }
+
 
         function toggleDeleteButton() {
             var checkboxes = document.getElementsByClassName("checkbox");
@@ -167,24 +266,16 @@
             xhttp.send(JSON.stringify({ "ids": ids }));
         }
 
-        function getUnixTimestamp() {
-            var input = document.getElementById('task-due').value;
+        function getUnixTimestamp(input) {
             var date = new Date(input);
 
             if (isNaN(date.getTime())) {
-                document.getElementById('unix-timestamp').innerText = "Invalid date/time";
-                return;
+                return "Invalid date/time";
             }
 
-            var formattedDate = ("0" + date.getDate()).slice(-2) + "/" +
-                                ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
-                                date.getFullYear().toString().slice(-2) + " " +
-                                ("0" + date.getHours()).slice(-2) + ":" +
-                                ("0" + date.getMinutes()).slice(-2);
             var unixTimestamp = date.getTime() / 1000;
 
-            var timestampString = unixTimestamp.toString();
-            return timestampString;
+            return unixTimestamp.toString();
         }
 
         function addTask(name, desc, due) {
@@ -203,6 +294,24 @@
             xhttp.open("PUT", "http://127.0.0.1:8000/create", true);
             xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhttp.send(JSON.stringify({ "task_name": name, "task_desc": desc, "task_due": due, "task_mark": false }));
+        }
+
+        function updateTask(id, name, desc, due, mark) {
+            console.log(id + ", " + name + ", " + desc + ", " + due);
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status === 200) {
+                        console.log("Task updated");
+                    } else {
+                        console.log("Error: " + this.status);
+                    }
+                    window.location.reload();
+                }
+            };
+            xhttp.open("POST", "http://127.0.0.1:8000/edit", true);
+            xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhttp.send(JSON.stringify({ "_id": id, "task_name": name, "task_desc": desc, "task_due": due, "task_mark": mark }));
         }
     </script>
 </body>

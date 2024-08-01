@@ -34,7 +34,7 @@ def getAll():
 def update():
     id = input("Input the ID of the record pending updater... ")
     response = r.post(url + "edit", headers={"Content-Type": "application/json"}, json={
-        "task_id": id
+        "_id": id
     })
     print(response.status_code)
     # print(json.dumps(json.loads(response.text), indent=2))
