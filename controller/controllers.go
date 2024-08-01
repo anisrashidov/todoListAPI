@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 	"text/template"
 	"time"
@@ -58,7 +59,11 @@ func GetTask(w http.ResponseWriter, r *http.Request) {
 func GetAllTasks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Allow-Control-Allow-Methods", "GET")
 	tasks := getAllTasks(task_coll)
-	tmpl, err := template.ParseFiles("../todoListAPI/router/static/index.html")
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	tmpl, err := template.ParseFiles(path.Join(cwd, "router", "static", "index.html"))
 	if err != nil {
 		log.Fatal(err)
 	}
